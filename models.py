@@ -1,5 +1,4 @@
 import sqlalchemy as sq
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
 from sqlalchemy.orm import declarative_base, relationship
 
 
@@ -12,7 +11,6 @@ class Publisher(Base):
     id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=40), unique=True)
 
-    book = relationship("Book", back_populates="publisher")
 
     def __str__(self):
         return f'{self.id}: {self.name}'
@@ -25,8 +23,7 @@ class Book(Base):
     title = sq.Column(sq.String, nullable=False)
     id_publisher = sq.Column(sq.Integer, sq.ForeignKey("publisher.id"), nullable=False)
 
-    publisher = relationship("Publisher", back_populates="book")
-    stock2 = relationship("Book", back_populates="book2")
+    publisher = relationship("Publisher", backref="book")
 
 
 class Shop(Base):
@@ -35,7 +32,9 @@ class Shop(Base):
     id = sq.Column(sq.Integer, primary_key=True)
     name = sq.Column(sq.String(length=40), unique=True)
 
-    stock = relationship("Stock", back_populates="shop")
+
+    def __str__(self):
+        return f'Магазин {self.id}: {self.name}'
 
 
 class Stock(Base):
@@ -46,9 +45,8 @@ class Stock(Base):
     id_book = sq.Column(sq.Integer, sq.ForeignKey("book.id"), nullable=False)
     id_shop = sq.Column(sq.Integer, sq.ForeignKey("shop.id"), nullable=False)
 
-    shop = relationship("Shop", back_populates="stock")
-    book2 = relationship("Book", back_populates="stock2")
-    sale = relationship("Sale", back_populates="stock3")
+    book = relationship(Book, backref="stock")
+    shop = relationship(Shop, backref="stock")
 
 
 class Sale(Base):
@@ -60,7 +58,7 @@ class Sale(Base):
     date_sale = sq.Column(sq.Date, nullable=False)
     id_stock = sq.Column(sq.Integer, sq.ForeignKey("stock.id"), nullable=False)
 
-    stock3 = relationship("Stock", back_populates="sale")
+    stock = relationship(Stock, backref="sale")
 
 
 def create_tables(engine):
